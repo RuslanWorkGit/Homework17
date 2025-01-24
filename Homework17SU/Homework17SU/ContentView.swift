@@ -10,13 +10,17 @@ import SwiftUI
 struct ContentView: View {
     
     @State private var text = "Text"
+    @StateObject private var actor = ViewModelActor()
     
     var body: some View {
         VStack {
 
             Text(text)
             Button("GCP") {
-                gcpStart()
+                gcpClass.gcpStart { result in
+                    text = result
+                }
+                
             }
             .font(.title3)
             .foregroundColor(.white)
@@ -28,7 +32,16 @@ struct ContentView: View {
 
             
             Button("Actor") {
-                
+                Task {
+                    text = "Actor logic in progress..."
+                    //let actor = ActorStart()
+                    await actor.start()
+                    if let error = actor.errorMessage {
+                        text = error
+                    } else {
+                        text = actor.data
+                    }
+                }
             }
             .font(.title3)
             .foregroundColor(.white)
@@ -40,57 +53,9 @@ struct ContentView: View {
         }
         .padding()
     }
+
+
     
-    func gcpStart() {
-        
-        let group = DispatchGroup()
-        
-        group.enter()
-        DispatchQueue.global(qos: .userInteractive).async {
-            var counter = 0
-            while counter <= 10000 {
-                counter += 1
-                print("🐶 - User Interactive, iteration - \(counter)")
-            }
-            group.leave()
-        }
-        
-        group.enter()
-        DispatchQueue.global(qos: .userInitiated).async {
-            var counter = 0
-            while counter <= 10000 {
-                counter += 1
-                print("🐸 - User Initiated, iteration - \(counter)")
-            }
-            group.leave()
-        }
-        
-        group.enter()
-        DispatchQueue.global(qos: .utility).async {
-            var counter = 0
-            while counter <= 10000 {
-                counter += 1
-                print("🐒 - Utility, iteration - \(counter)")
-            }
-            group.leave()
-        }
-        
-        group.enter()
-        DispatchQueue.global(qos: .background).async {
-            var counter = 0
-            while counter <= 10000 {
-                counter += 1
-                print("🐳 - Background, iteration - \(counter)")
-            }
-            group.leave()
-        }
-     
-        
-        group.notify(queue: DispatchQueue.main) {
-            text = "Done task"
-        }
-        
-    }
 }
 
 #Preview {
