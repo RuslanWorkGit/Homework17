@@ -27,7 +27,7 @@ class ViewController: UIViewController {
         return button
     }()
 
-    let actorButton: UIButton = {
+    private let actorButton: UIButton = {
         let button = UIButton()
         button.setTitle("Actor", for: .normal)
         button.tintColor = .white
@@ -37,12 +37,14 @@ class ViewController: UIViewController {
         return button
     }()
     
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.addSubview(lable)
         view.addSubview(gcdButton)
         view.addSubview(actorButton)
+        
         
         gcdButton.addTarget(self, action: #selector(gcpButtonAction), for: .touchUpInside)
         actorButton.addTarget(self, action: #selector(actorButtonAction), for: .touchUpInside)
@@ -117,11 +119,47 @@ class ViewController: UIViewController {
 //            if let lable = self.view.subviews.first(where: { $0 is UILabel }) as? UILabel {
 //                lable.text = "Task DONE!!!!"
 //            }
+            
+            
         }
     }
     
     @objc func actorButtonAction() {
+    
         
+        actor ActorText {
+            private var textLable = ""
+            
+            func run() async throws {
+                var counter = 0
+                
+                while counter <= 15000 {
+                    counter += 1
+                    print("Actor is working, counter: \(counter)")
+                }
+            }
+            
+            func currentText() -> String {
+                textLable
+            }
+            
+            func updateText(_ newText: String) -> String {
+                textLable = newText
+                return textLable
+            }
+        }
+        
+        let actorInstance = ActorText()
+        Task {
+            await actorInstance.updateText("Actor logic in progress...")
+            lable.text = await actorInstance.currentText()
+            
+            try await actorInstance.run()
+            
+            await actorInstance.updateText("Actor logic is finished")
+            lable.text = await actorInstance.currentText()
+        
+        }
     }
 }
 
