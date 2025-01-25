@@ -37,6 +37,8 @@ class ViewController: UIViewController {
         return button
     }()
     
+    private let gcdLogic = GcdLogic()
+    private let actorInstance = ActorText()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,6 +46,7 @@ class ViewController: UIViewController {
         view.addSubview(lable)
         view.addSubview(gcdButton)
         view.addSubview(actorButton)
+        
         
         
         gcdButton.addTarget(self, action: #selector(gcpButtonAction), for: .touchUpInside)
@@ -66,97 +69,23 @@ class ViewController: UIViewController {
     }
     
     @objc func gcpButtonAction() {
-        let group = DispatchGroup()
-        
-        group.enter()
-        DispatchQueue.global(qos: .userInteractive).async {
-            var counter = 0
-            while counter <= 10000 {
-                counter += 1
-                print("🐭 - user Interactive, iteration - \(counter)")
-
+        gcdLogic.gcdRun { [weak self] result in
+            DispatchQueue.main.async {
+                self?.lable.text = result
             }
-            group.leave()
-        }
-        
-        group.enter()
-        DispatchQueue.global(qos: .userInitiated).async {
-            var counter = 0
-            while counter <= 10000 {
-                counter += 1
-                print("🐷 - user Initiated, iteration - \(counter)")
-            }
-            group.leave()
-        }
-        
-        group.enter()
-        DispatchQueue.global(qos: .utility).async {
-            var counter = 0
-            while counter <= 10000 {
-                counter += 1
-                print("🐥 - utility, iteration - \(counter)")
-
-            }
-            group.leave()
-        }
-        
-        group.enter()
-        DispatchQueue.global(qos: .background).async {
-            var counter = 0
-            while counter <= 10000 {
-                counter += 1
-                print("🐳 - background, iteration - \(counter)")
-
-            }
-            group.leave()
-        }
-        
-        group.notify(queue: .main) {
-            print("✅ Всі завдання завершені")
-            
-            self.lable.text = "Task DONE!!!!"
-            
-//            if let lable = self.view.subviews.first(where: { $0 is UILabel }) as? UILabel {
-//                lable.text = "Task DONE!!!!"
-//            }
-            
-            
         }
     }
     
     @objc func actorButtonAction() {
-    
-        
-        actor ActorText {
-            private var textLable = ""
-            
-            func run() async throws {
-                var counter = 0
-                
-                while counter <= 15000 {
-                    counter += 1
-                    print("Actor is working, counter: \(counter)")
-                }
-            }
-            
-            func currentText() -> String {
-                textLable
-            }
-            
-            func updateText(_ newText: String) -> String {
-                textLable = newText
-                return textLable
-            }
-        }
-        
-        let actorInstance = ActorText()
+
+        //let actorInstance = ActorText()
         Task {
             await actorInstance.updateText("Actor logic in progress...")
             lable.text = await actorInstance.currentText()
             
-            try await actorInstance.run()
+            let result = try await actorInstance.run()
             
-            await actorInstance.updateText("Actor logic is finished")
+            await actorInstance.updateText(result)
             lable.text = await actorInstance.currentText()
         
         }
